@@ -1,0 +1,22 @@
+{
+    "jql": "project = CSW1702A && issuetype = 故障",
+    "expand":["changelog"],
+    "startAt": 0,
+    "maxResults": 13,
+    "fields": [
+        "summary",
+        "components",
+        "project",
+        "reporter",
+        "created",
+        "priority",
+        "customfield_10011",
+        "customfield_10012",
+        "customfield_10009",
+        "assignee",
+        "status",
+        "updated",
+        "resolution",
+        "resolutiondate"
+    ]
+}
