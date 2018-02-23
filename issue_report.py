@@ -260,19 +260,24 @@ def bug_trend(issues, title='BUG趋势图', width=1440, height=1080, image_filen
         patch_date = [(created_by_day.index[0] - 1).strftime('%y-%m-%d')]
         patch_value = [0]
 
+    recent_limit = 0
+    if len(resolved_issued_by_day) > 11:
+        #just show the recent 12 weeks
+        recent_limit = len(resolved_issued_by_day) - 11
+
     data = [
         go.Scatter(
-            y=unresolved_issue_byday.values,
-            x=list(unresolved_issue_byday.index.strftime('%y-%m-%d')),
+            y=unresolved_issue_byday.values[recent_limit:],
+            x=list(unresolved_issue_byday.index.strftime('%y-%m-%d'))[recent_limit:],
             mode='lines+markers',
             name='未解BUG趋势线',
             # marker=dict(color='#000000'),
         ),
 
 	go.Bar(
-            y=patch_value + list(created_by_day.values),
-            x=patch_date + list(created_by_day.index.strftime('%y-%m-%d')),
-            text=patch_value + list(created_by_day.values),
+            y=(patch_value + list(created_by_day.values))[recent_limit:],
+            x=(patch_date + list(created_by_day.index.strftime('%y-%m-%d')))[recent_limit:],
+            text=(patch_value + list(created_by_day.values))[recent_limit:],
             textposition='outside',
             name='新提交的BUG',
             marker=dict(
@@ -285,9 +290,9 @@ def bug_trend(issues, title='BUG趋势图', width=1440, height=1080, image_filen
         ),
 
         go.Bar(
-            y=unresolved_issue_byday.values,
-            x=list(unresolved_issue_byday.index.strftime('%y-%m-%d')),
-            text=unresolved_issue_byday.values,
+            y=unresolved_issue_byday.values[recent_limit:],
+            x=list(unresolved_issue_byday.index.strftime('%y-%m-%d'))[recent_limit:],
+            text=unresolved_issue_byday.values[recent_limit:],
             textposition='outside',
             name='剩余未解的BUG',
             marker=dict(
@@ -301,9 +306,9 @@ def bug_trend(issues, title='BUG趋势图', width=1440, height=1080, image_filen
         ),
 
         go.Bar(
-            y=resolved_issued_by_day.values,
-            x=list(resolved_issued_by_day.index.strftime('%y-%m-%d')),
-            text=resolved_issued_by_day.values,
+            y=resolved_issued_by_day.values[recent_limit:],
+            x=list(resolved_issued_by_day.index.strftime('%y-%m-%d'))[recent_limit:],
+            text=resolved_issued_by_day.values[recent_limit:],
             textposition='outside',
             # textfont=dict(size=22),
             outsidetextfont=dict(size=11),
@@ -319,11 +324,11 @@ def bug_trend(issues, title='BUG趋势图', width=1440, height=1080, image_filen
 
     bandxaxis = go.XAxis(
         range=[(created_by_day.index[0] - 1).strftime('%y-%m-%d'),
-               (created_by_day.index[-1] + 1).strftime('%y-%m-%d'), ],
+            (created_by_day.index[-1] + 1).strftime('%y-%m-%d')][recent_limit:],
         ticks="",
         showticklabels=True,
-        ticktext=list(created_by_day.index.strftime('%b %d')),
-        tickvals=list(created_by_day.index.strftime('%y-%m-%d')),
+        ticktext=list(created_by_day.index.strftime('%b %d'))[recent_limit:],
+        tickvals=list(created_by_day.index.strftime('%y-%m-%d'))[recent_limit:],
         tickfont=dict(size=16)
     )
 
