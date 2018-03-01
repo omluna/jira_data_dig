@@ -41,7 +41,7 @@ pipeline = [ {'$project':{'_id':0, 'key':'$key', 'project':{ '$substr': [ "$proj
                           'component':'$component','priority':'$priority','probability':'$probability', 'phenomenon':'$phenomenon'}},
             {"$sort":{'assignee':1}}]
 
-issues = pd.DataFrame(list(cydb.issues.aggregate(pipeline)))
+issues = pd.DataFrame(list(cydb.issues_new.aggregate(pipeline)))
 
 now = datetime.datetime.today()
 mm = Mailer()
