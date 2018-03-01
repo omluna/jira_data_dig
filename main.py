@@ -41,7 +41,7 @@ pipeline = [ {'$project':{'_id':0, 'key':'$key', 'project':{ '$substr': [ "$proj
                           'component':'$component','priority':'$priority','probability':'$probability', 'phenomenon':'$phenomenon'}},
             {"$sort":{'assignee':1}}]
 
-issues = pd.DataFrame(list(cydb.issues.aggregate(pipeline)))
+issues = pd.DataFrame(list(cydb.issues_new.aggregate(pipeline)))
 
 now = datetime.datetime.today()
 mm = Mailer()
@@ -74,7 +74,7 @@ def send_bug_trend():
     make_pptx(file_list, ppt_filename)
     attachment=os.path.abspath(ppt_filename)
     mailto_list = ["lugf@chenyee.com", "gaolan@chenyee.com", "zhanght@chenyee.com", "spm@chenyee.com", 
-            'yangyx@chenyee.com', 'luohui@chenyee.com', 'wangjz@chenyee.com']
+            'yangyx@chenyee.com', 'liuxinhua@chenyee.com', 'luohui@chenyee.com', 'wangjz@chenyee.com']
     mail_title = 'P1 BUG趋势图-' + str(now.date())
     mail_content = '截至上周的P1BUG趋势图，见附件'
     #mailto_list = ['lugf@chenyee.com']
@@ -108,6 +108,9 @@ def send_bug_employee_week():
         mail_title = '{}成员P1BUG情况({})'.format(depts[dept], str(now.date()))
         mail_content = ' '
         mailto_list = [leader_mail[dept]]
+        if dept == 'bsp':
+            mailto_list.append('liuxinhua@chenyee.com')
+
         image_list = [os.path.abspath(dept + '.png')]
         mailcc = ['spm@chenyee.com', 'lugf@chenyee.com']
 
