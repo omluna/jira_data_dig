@@ -187,6 +187,11 @@ def bug_count_employee(issues, group, orig_project_list, width=800, row_height=5
 
             xaxis = 'x{}'.format(x)
             yaxis = 'y1'
+            text_list = list(p1.index)
+            for name in p2.index:
+                if name not in p1.index:
+                    text_list.append(name)
+
             bar_list.append(go.Bar(x=p1.index, y=p1.values, text=p1.values, width=bar_width, textposition='inside',
                                    name='P1-Highest', textfont=dict(color='#ffffff'), showlegend=showlegend,
                                    marker=dict(color='rgb(239,8,8)',), xaxis=xaxis, yaxis=yaxis))
@@ -198,7 +203,9 @@ def bug_count_employee(issues, group, orig_project_list, width=800, row_height=5
                       x*xaxis_width + (x-1)*subplot_gap*xaxis_width]
             update_xaxis = {'xaxis{}'.format(x): {'anchor': 'y1', 'domain': domain, 
                                                     'title': '{} 合计:{}'.format(project, len(issues_pp2) + len(issues_pp1)),
-                                                    'tickangle': 45}}
+                                                    'ticktext':text_list,
+                                                    'tickvals':text_list,
+                                                    'tickangle': 90}}
             layout.update(update_xaxis)
 
         y = 1
@@ -217,6 +224,11 @@ def bug_count_employee(issues, group, orig_project_list, width=800, row_height=5
 
             xaxis = 'x{}'.format(over+x+(y-start_row)*max_col)
             yaxis = 'y{}'.format(y)
+            text_list = list(p1.index)
+            for name in p2.index:
+                if name not in p1.index:
+                    text_list.append(name)
+
 
             bar_list.append(go.Bar(x=p1.index, y=p1.values, text=p1.values, textposition='inside', width=bar_width,
                                    name='P1-Highest', textfont=dict(color='#ffffff'), showlegend=showlegend,
@@ -231,7 +243,9 @@ def bug_count_employee(issues, group, orig_project_list, width=800, row_height=5
             update_xaxis = {'xaxis{}'.format(over+x+(y-start_row)*max_col): {'anchor': yaxis,
                                                                              'domain': domain, 
                                                                              'title': '{} 合计:{}'.format(project, len(issues_pp2) + len(issues_pp1)),
-                                                                             'tickangle': 45}, }
+                                                                             'ticktext':text_list,
+                                                                             'tickvals':text_list,
+                                                                             'tickangle': 90}, }
             layout.update(update_xaxis)
 
         update_yaxis = {'yaxis{}'.format(y): {'domain': [(y-1)*yaxis_width + (y-1)*subplot_gap*yaxis_width,
