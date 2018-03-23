@@ -242,7 +242,7 @@ def main(orig_args):
     mongodb_host = '18.8.8.209'
     jira_webclient = get_client_handler()
     get_depts(mongodb_host)
-    issues_list = get_issues_from_jira(jira_webclient=jira_webclient,updated='50m')
+    issues_list = get_issues_from_jira(jira_webclient=jira_webclient,updated='1h')
     print('sync with jira....' + str(datetime.now()))
     issue_list = convert_issues(issues_list)
 
