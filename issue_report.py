@@ -12,6 +12,7 @@ import plotly.graph_objs as go
 import plotly.offline as py
 #import cufflinks as cf
 import pptx
+import math
 from pptx.util import Inches
 
 
@@ -522,7 +523,7 @@ def parse_changelog(issue):
     return anchor_time   
 
 
-def stop_time_count_bubble(name, filename, height=400, width=800):
+def stop_time_count_bubble(anchro_time_df, name, filename, height=400, width=800):
     days = 14
     now = datetime.date.today()
     em = anchro_time_df[anchro_time_df.displayName == name].sort_values(by='when')

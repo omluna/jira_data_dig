@@ -194,7 +194,7 @@ def send_bug_group_eff():
     for group in iter(group_list):
         group_member = anchro_time_df[anchro_time_df.group == group_list[group]].displayName.unique()
         for i, name in enumerate(group_member):
-            stop_time_count_bubble(name, filename=group+str(i))
+            stop_time_count_bubble(anchro_time_df, name, filename=group+str(i))
 
     download_file(report_dir)
 
@@ -212,8 +212,8 @@ def send_bug_group_eff():
         mailcc = ['spm@chenyee.com', 'lugf@chenyee.com', leader_list[group]]
 
         print(group + " " + str(mailto_list) + "\n" + str(image_list) + " mailcc:" + str(mailcc))
-        mailto_list = ['lugf@chenyee.com']
-        mailcc = ['lmmsuu@163.com','']
+        #mailto_list = ['lugf@chenyee.com']
+        #mailcc = ['lmmsuu@163.com','']
         if mm.sendemail('scmjira@chenyee.com', mailto_list, mail_title, mail_content, listCc=mailcc, listImagePath=image_list) == False:
             print('resend.....')
             mm.sendemail('scmjira@chenyee.com', mailto_list, mail_title, mail_content, listCc=mailcc, listImagePath=image_list)
