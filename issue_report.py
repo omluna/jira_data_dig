@@ -450,3 +450,152 @@ def bug_employee_week(issues, dept, image_filename, width=800, height=600,):
     py.plot(fig, filename=image_filename + '.html', auto_open=False,
             image='png', image_height=height, image_width=width, image_filename=image_filename)
     #py.iplot(fig)
+
+
+def parse_changelog(issue):
+    now = datetime.datetime.now()
+    anchor_time = []
+    
+    is_opened_bug = True
+    last_assigned = issue['assignee_id']
+    change_logs = issue['change_logs']
+    last_update_time = issue['created'].to_pydatetime()
+    for change_log in change_logs:
+        t = dict()
+        # change_log 里的datetime 需要加上8小时转换为北京时间
+        time_from = change_log['date'] + datetime.timedelta(hours=8)
+        #pprint.pprint(time_from)
+        for item in change_log['items']:
+            if item['field'] == 'assignee':
+                t['who'] = item['from']
+                t['when'] = time_from
+                t['time'] = (time_from - last_update_time).total_seconds()/86400
+                t['issue_id'] = issue['key']
+                last_assigned = item['to']
+                last_update_time = time_from
+
+                anchor_time.append(t)
+                break
+            if item['to'] == 'Resolved':
+                is_opened_bug = False
+                t['who'] = change_log['author']
+                t['when'] = time_from
+                t['issue_id'] = issue['key']
+                t['time'] = (time_from - last_update_time).total_seconds()/86400
+                last_update_time = time_from
+
+                anchor_time.append(t)
+                break
+
+            if item['to'] == 'Closed':
+                is_opened_bug = False
+                t['who'] = change_log['author']
+                t['when'] = time_from
+                t['issue_id'] = issue['key']
+                t['time'] = (time_from - last_update_time).total_seconds()/86400
+                last_update_time = time_from
+
+                anchor_time.append(t)
+                break
+                
+            if item['to'] == 'Reopened':
+                t['who'] = change_log['author']
+                t['issue_id'] = issue['key']
+                t['when'] = time_from
+                t['time'] = (time_from - last_update_time).total_seconds()/86400
+                last_update_time = time_from
+                is_opened_bug = True
+
+                anchor_time.append(t)
+                break
+
+
+    if is_opened_bug:
+        t = dict()
+        t['who'] = last_assigned
+        t['issue_id'] = issue['key']
+        t['when'] = now
+        t['time'] = (now - last_update_time).total_seconds()/86400
+        
+        anchor_time.append(t)
+
+    return anchor_time   
+
+
+def stop_time_count_bubble(name, filename, height=400, width=800):
+    days = 14
+    now = datetime.date.today()
+    em = anchro_time_df[anchro_time_df.displayName == name].sort_values(by='when')
+    em = em.set_index('when')
+    count_sum = em.resample('D')['time'].count()
+    time_sum = em.resample('D')['time'].sum()
+    mean_time_single = time_sum/count_sum
+    mean_time = time_sum.cumsum()/count_sum.cumsum()
+    from_day = now - datetime.timedelta(days=days)
+    day_label = pd.date_range(from_day, now)
+    
+    bubble_size = count_sum.apply(math.sqrt)
+    bubble_sizeref=5
+    sizeref = bubble_sizeref*bubble_size.max()/(50**2)
+    text_list = count_sum[from_day:]
+
+    line_time = go.Scatter(
+        x=day_label,
+        y=mean_time[from_day:].values,
+        mode='markers+text',
+        text=text_list,
+        textposition='auto',
+        textfont=dict(color='#ffffff',size=9),
+        showlegend=False,
+        marker=dict(
+            color='#005995',
+            sizemode='area',
+            size=bubble_size[from_day:].values,
+            sizeref=sizeref,
+        )
+        
+    )
+    
+    bandxaxis = go.XAxis(
+        type='date',
+        range=[from_day- datetime.timedelta(days=1), now + datetime.timedelta(days=1)],
+        ticks="outside", 
+        showticklabels=True,
+        ticktext=list(day_label.strftime('%m-%d %a')),
+        tickvals=day_label,
+        tickfont=dict(size=11),
+        #tickfont=dict(size=11,color='#B9B9C3'),
+        #ticklen=10,
+        tickangle=90,
+    )
+    
+    bandyaxis = go.YAxis(
+        #type='date',
+        title='累计平均处理时间（单位:天）',
+        range=[-0.5, mean_time[from_day:].max() + 1],
+        #ticks="outside", 
+        #showticklabels=True,
+        #ticktext=list(day_label.strftime('%m-%d')),
+        #tickvals=day_label,
+        tickfont=dict(size=11),
+        #tickfont=dict(size=11,color='#B9B9C3'),
+        #ticklen=10,
+        #tickangle=90
+        #color='#FFFFFF'
+    )
+
+    data = [line_time]
+    layout = go.Layout(
+        titlefont=dict(size=15),
+        title = name + '<br>近两周处理过的BUG总数：' + str(count_sum[from_day:].sum()),
+        xaxis = bandxaxis,
+        yaxis = bandyaxis,
+        height = height,
+        width = width,
+        margin = dict(b=120)
+    )
+
+    fig = go.Figure(data=data, layout=layout)
+    py.plot(fig, filename=filename + '.html', auto_open=False,
+            image='png', image_height=height, image_width=width, image_filename=filename)
+    #py.iplot(fig)

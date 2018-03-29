@@ -20,12 +20,14 @@ logging.info("start generate reports")
 
 work_dir = '/home/lugf/reports/'
 employee_bugs_dir = work_dir + 'employee_bugs/'
+employee_eff_dir = work_dir + 'employee_eff/'
 bug_trend_dir = work_dir + 'bug_trend/'
 dept_bug_stat_dir = work_dir + 'dept_stat_bugs/'
 
 os.makedirs(dept_bug_stat_dir, exist_ok=True)
 os.makedirs(employee_bugs_dir, exist_ok=True)
 os.makedirs(bug_trend_dir, exist_ok=True)
+os.makedirs(employee_eff_dir, exist_ok=True)
 
 #project_list = ['SW17W16', 'CSW1702', 'CSW1705']
 project_list = ['SW17W16', 'CSW1702', 'CSW1705', 'CSW1703']
@@ -34,12 +36,20 @@ client = pymongo.MongoClient('18.8.8.209')
 cydb = client.cy
 
 
-pipeline = [ {'$project':{'_id':0, 'key':'$key', 'project':{ '$substr': [ "$project", 0, 7 ] }, 'assignee':'$assignee.displayName', 
+# pipeline = [ {'$project':{'_id':0, 'key':'$key', 'project':{ '$substr': [ "$project", 0, 7 ] }, 'assignee':'$assignee.displayName', 
+#                           'dept':'$assignee.dept', 'group':'$assignee.group', 
+#                           'status':'$status','created':{'$add': [ "$created_time", 8*60*60000 ]}, 'last_updated':{'$add': [ "$updated_time", 8*60*60000 ]},
+#                           'change_logs':'$change_logs', 'resolved':{'$add': [ "$resolution.when", 8*60*60000 ]}, 
+#                           'component':'$component','priority':'$priority','probability':'$probability', 'phenomenon':'$phenomenon'}},
+#             {"$sort":{'assignee':1}}]
+
+
+pipeline = [ {'$project':{'_id':0, 'key':'$key', 'project':{ '$substr': [ "$project", 0, 7 ] }, 'assignee_id':'$assignee.name', 'assignee':'$assignee.displayName', 
                           'dept':'$assignee.dept', 'group':'$assignee.group', 
                           'status':'$status','created':{'$add': [ "$created_time", 8*60*60000 ]}, 'last_updated':{'$add': [ "$updated_time", 8*60*60000 ]},
                           'change_logs':'$change_logs', 'resolved':{'$add': [ "$resolution.when", 8*60*60000 ]}, 
                           'component':'$component','priority':'$priority','probability':'$probability', 'phenomenon':'$phenomenon'}},
-            {"$sort":{'assignee':1}}]
+            {"$sort":{'created':1}}]
 
 issues = pd.DataFrame(list(cydb.issues_new.aggregate(pipeline)))
 
@@ -160,6 +170,56 @@ def send_bug_group():
             mm.sendemail('scmjira@chenyee.com', mailto_list, mail_title, mail_content, listCc=mailcc, listImagePath=image_list)
         print('---finish send group info ------')
 
+
+def send_bug_group_eff():
+    dept_info = cydb.dept.find(projection={'name': 1, 'email': 1, 'displayName':1, 'dept': 1, 'group':1, '_id': 0})
+    depts = pd.DataFrame(list(dept_info))
+    emails = dict(list(depts.groupby(depts['group'])['email']))
+
+    group_list = {'xh':'晓慧组',  'xy':'小叶组', 'pp':'盼盼组', 'gms':'GMS组', 'xt':'小甜组', 'cam':'影像部', 'bsp':'驱动部', }
+    leader_list = {'xh':'luohui@chenyee.com',  'xy':'luohui@chenyee.com', 'pp':'luohui@chenyee.com', 'gms':'luohui@chenyee.com', 
+            'xt':'luohui@chenyee.com', 'cam':'', 'bsp':'', }
+    report_dir = employee_eff_dir + str(now.date())
+    os.makedirs(report_dir, exist_ok=True)
+    os.chdir(report_dir)
+
+    issues_p1_p2 = issues[issues['priority'].isin(['P1-Highest', 'P2-High'])]
+    anchor_time_list = []
+    for i, issue in issues_p1_p2.iterrows():
+        anchor_time_list += parse_changelog(issue)
+    
+    df = pd.DataFrame(anchor_time_list)
+    anchro_time_df = pd.merge(df, depts, left_on='who', right_on='name')
+
+    for group in iter(group_list):
+        group_member = anchro_time_df[anchro_time_df.group == group_list[group]].displayName.unique()
+        for i, name in enumerate(group_member):
+            stop_time_count_bubble(name, filename=group+str(i))
+
+    download_file(report_dir)
+
+    for group in iter(group_list):
+        group_member = anchro_time_df[anchro_time_df.group == group_list[group]].displayName.unique()
+        mail_title = '{}近两周BUG流转效率统计({})'.format(group_list[group], str(now.date()))
+        mail_content = ' '
+        if group == 'cam':
+            mailto_list = ['image@chenyee.com']
+        elif group == 'bsp':
+            mailto_list = ['bsp@chenyee.com']
+        else:
+            mailto_list = list(emails[group_list[group]])
+        image_list = [os.path.abspath('{}{}.png'.format(group,i)) for i in range(0, len(group_member))]
+        mailcc = ['spm@chenyee.com', 'lugf@chenyee.com', leader_list[group]]
+
+        print(group + " " + str(mailto_list) + "\n" + str(image_list) + " mailcc:" + str(mailcc))
+        mailto_list = ['lugf@chenyee.com']
+        mailcc = ['lmmsuu@163.com','']
+        if mm.sendemail('scmjira@chenyee.com', mailto_list, mail_title, mail_content, listCc=mailcc, listImagePath=image_list) == False:
+            print('resend.....')
+            mm.sendemail('scmjira@chenyee.com', mailto_list, mail_title, mail_content, listCc=mailcc, listImagePath=image_list)
+        print('---finish send group efficient info ------')
+
+
 def main(orig_args):
     print("generate report for " + orig_args[0])
     if orig_args[0] == 'bugtrend':
@@ -170,6 +230,9 @@ def main(orig_args):
 
     if orig_args[0] == 'week_bug_employee':
         send_bug_employee_week()
+
+    if orig_args[0] == 'group_eff':
+        send_bug_group_eff()
 
 
 if __name__ == '__main__':
