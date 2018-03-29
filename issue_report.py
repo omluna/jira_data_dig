@@ -573,7 +573,7 @@ def stop_time_count_bubble(anchro_time_df, name, filename, height=400, width=800
     bandyaxis = go.YAxis(
         #type='date',
         title='累计平均处理时间（单位:天）',
-        range=[-0.5, mean_time[from_day:].max() + 1],
+        range=[-0.5, mean_time[from_day:].max() + 2],
         #ticks="outside", 
         #showticklabels=True,
         #ticktext=list(day_label.strftime('%m-%d')),
