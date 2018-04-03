@@ -30,7 +30,7 @@ os.makedirs(bug_trend_dir, exist_ok=True)
 os.makedirs(employee_eff_dir, exist_ok=True)
 
 #project_list = ['SW17W16', 'CSW1702', 'CSW1705']
-project_list = ['SW17W16', 'CSW1702', 'CSW1705', 'CSW1703']
+project_list = ['CSW1707', 'SW17W16', 'CSW1702', 'CSW1705', 'CSW1703']
 
 client = pymongo.MongoClient('18.8.8.209')
 cydb = client.cy
@@ -51,7 +51,7 @@ pipeline = [ {'$project':{'_id':0, 'key':'$key', 'project':{ '$substr': [ "$proj
                           'component':'$component','priority':'$priority','probability':'$probability', 'phenomenon':'$phenomenon'}},
             {"$sort":{'created':1}}]
 
-issues = pd.DataFrame(list(cydb.issues_new.aggregate(pipeline)))
+issues = pd.DataFrame(list(cydb.issues.aggregate(pipeline)))
 
 now = datetime.datetime.today()
 mm = Mailer()

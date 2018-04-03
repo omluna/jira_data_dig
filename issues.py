@@ -225,15 +225,15 @@ def convert_issues(issues_list):
 def create_mongodb(issue_list, host='localhost'):
     client = pymongo.MongoClient(host)
     cydb = client.cy
-    cydb.issues_new.drop()
-    cydb.issues_new.insert_many(issue_list)
+    cydb.issues.drop()
+    cydb.issues.insert_many(issue_list)
 
 
 def update_mongodb(issue_list, host='localhost'):
     client = pymongo.MongoClient(host)
     cydb = client.cy
     for issue in issue_list:
-        result = cydb.issues_new.replace_one({'key': issue['key']}, issue, True)
+        result = cydb.issues.replace_one({'key': issue['key']}, issue, True)
         if result.raw_result['ok'] != 1.0:
             print("error: key is " + issue['key'])
 
@@ -243,6 +243,7 @@ def main(orig_args):
     jira_webclient = get_client_handler()
     get_depts(mongodb_host)
     issues_list = get_issues_from_jira(jira_webclient=jira_webclient,updated='1h')
+    #issues_list = get_issues_from_jira(jira_webclient=jira_webclient,updated=None)
     print('sync with jira....' + str(datetime.now()))
     issue_list = convert_issues(issues_list)
 
