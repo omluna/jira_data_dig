@@ -17,7 +17,7 @@ import numpy as np
 jira_server_url = "http://bug.chenyee.com:8080/"
 headers = {"Content-Type": "application/json"}
 dept_info = {}
-excluded_projects = ['ZPRJTE', 'TESTTOOLS', 'TEMP', 'TRANSTOOL']
+excluded_projects = ['ZPRJTE', 'TESTTOOLS', 'TEMP', 'TRANSTOOL', 'SCLUB']
 
 
 class SignatureMethod_RSA_SHA1(oauth.SignatureMethod):
