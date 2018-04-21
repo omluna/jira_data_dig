@@ -95,6 +95,7 @@ class Mailer(object):
             return True
         except Exception as e:
             print("ERROR:Send mail failed {0} with {1}".format(strSubJect, str(e)))
+            #self.smtp.quit()
             return False
 
 

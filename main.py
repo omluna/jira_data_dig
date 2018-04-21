@@ -11,6 +11,7 @@ from issue_report import *
 from notify import *
 from webdriver import *
 import logging
+import time
 
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %H:%M:%S', 
         level=logging.INFO,
@@ -84,12 +85,13 @@ def send_bug_trend():
     make_pptx(file_list, ppt_filename)
     attachment=os.path.abspath(ppt_filename)
     mailto_list = ["lugf@chenyee.com", "gaolan@chenyee.com", "zhanght@chenyee.com", "spm@chenyee.com", 
-            'yangyx@chenyee.com', 'liuxinhua@chenyee.com', 'luohui@chenyee.com', 'wangjz@chenyee.com']
+            'liuxinhua@chenyee.com', 'luohui@chenyee.com', 'wangjz@chenyee.com']
     mail_title = 'P1 BUG趋势图-' + str(now.date())
     mail_content = '截至上周的P1BUG趋势图，见附件'
     #mailto_list = ['lugf@chenyee.com']
     if mm.sendemail('scmjira@chenyee.com', mailto_list, mail_title, mail_content, attachment=attachment) == False:
         logging.info('resending....')
+        time.sleep(60)
         print('resend.....')
         mm.sendemail('scmjira@chenyee.com', mailto_list, mail_title, mail_content, attachment=attachment)
     logging.info('done sent bug trend....')
@@ -103,7 +105,7 @@ def send_bug_employee_week():
     issue_p1 = issues[issues['priority'].isin(['P1-Highest'])]
 
     depts = {'sw': '平台及客户软件部', 'bsp': '驱动部', 'cam': '影像部'}
-    leader_mail = {'sw':'luohui@chenyee.com', 'bsp':'yangyx@chenyee.com', 'cam':'zhanght@chenyee.com'}
+    leader_mail = {'sw':'luohui@chenyee.com', 'bsp':'liuxinhua@chenyee.com', 'cam':'zhanght@chenyee.com'}
     for dept in iter(depts):
         width = 800
         if len(issue_p1[issue_p1['dept'] == depts[dept]]) != 0:
@@ -118,8 +120,6 @@ def send_bug_employee_week():
         mail_title = '{}成员P1BUG情况({})'.format(depts[dept], str(now.date()))
         mail_content = ' '
         mailto_list = [leader_mail[dept]]
-        if dept == 'bsp':
-            mailto_list.append('liuxinhua@chenyee.com')
 
         image_list = [os.path.abspath(dept + '.png')]
         mailcc = ['spm@chenyee.com', 'lugf@chenyee.com']
@@ -129,6 +129,7 @@ def send_bug_employee_week():
         #mailcc = ['lmmsuu@163.com','']
         if mm.sendemail('scmjira@chenyee.com', mailto_list, mail_title, mail_content, listCc=mailcc, listImagePath=image_list) == False:
             print('resend.....')
+            time.sleep(60)
             mm.sendemail('scmjira@chenyee.com', mailto_list, mail_title, mail_content, listCc=mailcc, listImagePath=image_list)
         print('---finish send employee info ------')
 
@@ -153,20 +154,26 @@ def send_bug_group():
     for group in iter(group_list):
         mail_title = '{}未解BUG统计({})'.format(group_list[group], str(now.date()))
         mail_content = ' '
+        mailcc = ['spm@chenyee.com', 'lugf@chenyee.com']
+
+        #if group in ['xh', 'xy', 'pp', 'gms', 'xt']:
+        #   print('skip:' + group)
+        #   continue
         if group == 'cam':
             mailto_list = ['image@chenyee.com']
         elif group == 'bsp':
             mailto_list = ['bsp@chenyee.com']
         else:
+            mailcc = ['spm@chenyee.com', 'lugf@chenyee.com', leader_list[group]]
             mailto_list = list(emails[group_list[group]])
         image_list = [os.path.abspath(group + '.png')]
-        mailcc = ['spm@chenyee.com', 'lugf@chenyee.com', leader_list[group]]
 
         print(group + " " + str(mailto_list) + "\n" + str(image_list) + " mailcc:" + str(mailcc))
         #mailto_list = ['lugf@chenyee.com']
         #mailcc = ['lmmsuu@163.com','']
         if mm.sendemail('scmjira@chenyee.com', mailto_list, mail_title, mail_content, listCc=mailcc, listImagePath=image_list) == False:
             print('resend.....')
+            time.sleep(60)
             mm.sendemail('scmjira@chenyee.com', mailto_list, mail_title, mail_content, listCc=mailcc, listImagePath=image_list)
         print('---finish send group info ------')
 
@@ -202,20 +209,24 @@ def send_bug_group_eff():
         group_member = anchro_time_df[anchro_time_df.group == group_list[group]].displayName.unique()
         mail_title = '{}近两周BUG流转效率统计({})'.format(group_list[group], str(now.date()))
         mail_content = ' '
+        mailcc = ['spm@chenyee.com', 'lugf@chenyee.com']
+
         if group == 'cam':
             mailto_list = ['image@chenyee.com']
         elif group == 'bsp':
             mailto_list = ['bsp@chenyee.com']
         else:
+            mailcc = ['spm@chenyee.com', 'lugf@chenyee.com', leader_list[group]]
             mailto_list = list(emails[group_list[group]])
+
         image_list = [os.path.abspath('{}{}.png'.format(group,i)) for i in range(0, len(group_member))]
-        mailcc = ['spm@chenyee.com', 'lugf@chenyee.com', leader_list[group]]
 
         print(group + " " + str(mailto_list) + "\n" + str(image_list) + " mailcc:" + str(mailcc))
         #mailto_list = ['lugf@chenyee.com']
         #mailcc = ['lmmsuu@163.com','']
         if mm.sendemail('scmjira@chenyee.com', mailto_list, mail_title, mail_content, listCc=mailcc, listImagePath=image_list) == False:
             print('resend.....')
+            time.sleep(60)
             mm.sendemail('scmjira@chenyee.com', mailto_list, mail_title, mail_content, listCc=mailcc, listImagePath=image_list)
         print('---finish send group efficient info ------')
 
