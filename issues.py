@@ -242,13 +242,17 @@ def main(orig_args):
     mongodb_host = '18.8.8.209'
     jira_webclient = get_client_handler()
     get_depts(mongodb_host)
-    issues_list = get_issues_from_jira(jira_webclient=jira_webclient,updated='1h')
-    #issues_list = get_issues_from_jira(jira_webclient=jira_webclient,updated=None)
-    print('sync with jira....' + str(datetime.now()))
-    issue_list = convert_issues(issues_list)
 
-    #create_mongodb(issue_list, mongodb_host)
-    update_mongodb(issue_list, mongodb_host)
+    if orig_args[0] == 'c':
+        print('full sync with jira....' + str(datetime.now()))
+        issues_list = get_issues_from_jira(jira_webclient=jira_webclient,updated=None)
+        issue_list = convert_issues(issues_list)
+        create_mongodb(issue_list, mongodb_host)
+    else:
+        issues_list = get_issues_from_jira(jira_webclient=jira_webclient,updated='1h')
+        print('sync with jira....' + str(datetime.now()))
+        issue_list = convert_issues(issues_list)
+        update_mongodb(issue_list, mongodb_host)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
