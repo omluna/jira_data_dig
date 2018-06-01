@@ -271,6 +271,11 @@ def bug_trend(issues, title='BUG趋势图', width=1440, height=1080, image_filen
     
     patch_value = []
     patch_date = []
+
+    if len(created_by_day) == 0:
+        print(title + ' not enough data to show')
+        return False
+
     if len(created_by_day) == 1:
         patch_date = [(created_by_day.index[0] - 1).strftime('%y-%m-%d')]
         patch_value = [0]
@@ -392,6 +397,8 @@ def bug_trend(issues, title='BUG趋势图', width=1440, height=1080, image_filen
     # py.iplot(fig)
     py.plot(fig, filename=image_filename + '.html', auto_open=False,
             image='png', image_height=height, image_width=width, image_filename=image_filename)
+
+    return True
 
 
 def bug_employee_week(issues, dept, image_filename, width=800, height=600,):

@@ -31,7 +31,7 @@ os.makedirs(bug_trend_dir, exist_ok=True)
 os.makedirs(employee_eff_dir, exist_ok=True)
 
 #project_list = ['SW17W16', 'CSW1702', 'CSW1705']
-project_list = ['CSW1707', 'SW17W16', 'CSW1702', 'CSW1705', 'CSW1703']
+project_list = ['CSW1707', 'SWW1618', 'CSW1803', 'SW17W13', 'CSW1802']
 
 client = pymongo.MongoClient('18.8.8.209')
 cydb = client.cy
@@ -70,8 +70,8 @@ def send_bug_trend():
     for project in project_list:
         if len(issue_p1[issue_p1['project'] == project]) != 0:
             print("bug trend for " + project)
-            bug_trend(issue_p1[issue_p1['project'] == project], title='{} BUG趋势(P1)'.format(project), image_filename=project+'_bugtrend')
-            file_list.append(project+'_bugtrend.png')
+            if bug_trend(issue_p1[issue_p1['project'] == project], title='{} BUG趋势(P1)'.format(project), image_filename=project+'_bugtrend'):
+                file_list.append(project+'_bugtrend.png')
 
     depts = {'sw': '平台及客户软件部', 'bsp': '驱动部', 'cam': '影像部'}
     for dept in iter(depts):
