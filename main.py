@@ -84,7 +84,7 @@ def send_bug_trend():
     download_file(report_dir)
     make_pptx(file_list, ppt_filename)
     attachment=os.path.abspath(ppt_filename)
-    mailto_list = ["lugf@chenyee.com", "gaolan@chenyee.com", "zhanght@chenyee.com", "spm@chenyee.com", 
+    mailto_list = ["lugf@chenyee.com", "daiqn@chenyee.com", "wutz@chenyee.com", "spm@chenyee.com", 
             'liuxinhua@chenyee.com', 'luohui@chenyee.com', 'wangjz@chenyee.com']
     mail_title = 'P1 BUG趋势图-' + str(now.date())
     mail_content = '截至上周的P1BUG趋势图，见附件'
@@ -105,7 +105,7 @@ def send_bug_employee_week():
     issue_p1 = issues[issues['priority'].isin(['P1-Highest'])]
 
     depts = {'sw': '平台及客户软件部', 'bsp': '驱动部', 'cam': '影像部'}
-    leader_mail = {'sw':'luohui@chenyee.com', 'bsp':'liuxinhua@chenyee.com', 'cam':'zhanght@chenyee.com'}
+    leader_mail = {'sw':'luohui@chenyee.com', 'bsp':'liuxinhua@chenyee.com', 'cam':'wutz@chenyee.com'}
     for dept in iter(depts):
         width = 800
         if len(issue_p1[issue_p1['dept'] == depts[dept]]) != 0:
