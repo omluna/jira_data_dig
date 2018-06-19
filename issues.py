@@ -168,19 +168,20 @@ def convert_data(issue):
     issue_for_mongodb['component'] = issue['fields']['components'][0]['name']
     if issue['fields']['assignee'] is not None:
         try:
-            issue_for_mongodb['assignee'] = {'name': issue['fields']['assignee']['name'],
+            issue_for_mongodb['assignee'] = {'name': issue['fields']['assignee']['key'],
                                              'displayName': issue['fields']['assignee']['displayName'],
-                                             'dept': dept_info[issue['fields']['assignee']['name']][0],
-                                             'group': dept_info[issue['fields']['assignee']['name']][1]}
-        except KeyError:
-            issue_for_mongodb['assignee'] = {'name': issue['fields']['assignee']['name'],
+                                             'dept': dept_info[issue['fields']['assignee']['key']][0],
+                                             'group': dept_info[issue['fields']['assignee']['key']][1]}
+        except KeyError as err:
+            issue_for_mongodb['assignee'] = {'name': issue['fields']['assignee']['key'],
                                              'displayName': issue['fields']['assignee']['displayName'],
                                              'dept': '3rd', 'group': '3rd'}
-            print("not found key: {}".format(issue['fields']['assignee']['name']))
+            print("not found key for issue: {}, assignee:{}".format(issue['key'], issue['fields']['assignee']['key']))
+            print(err)
 
     else:
         issue_for_mongodb['assignee'] = None
-    issue_for_mongodb['reporter'] = {'name': issue['fields']['reporter']['name'],
+    issue_for_mongodb['reporter'] = {'name': issue['fields']['reporter']['key'],
                                      'displayName': issue['fields']['reporter']['displayName']}
     issue_for_mongodb['summary'] = issue['fields']['summary']
     issue_for_mongodb['status'] = issue['fields']['status']['name']

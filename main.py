@@ -177,6 +177,9 @@ def send_bug_group():
             mm.sendemail('scmjira@chenyee.com', mailto_list, mail_title, mail_content, listCc=mailcc, listImagePath=image_list)
         print('---finish send group info ------')
 
+def fixed_jira(df):
+    matched = df[df['who'] == 'zenggz']
+    df.loc[matched.index, ['who']] = 'zengguozhi'
 
 def send_bug_group_eff():
     dept_info = cydb.dept.find(projection={'name': 1, 'email': 1, 'displayName':1, 'dept': 1, 'group':1, '_id': 0})
@@ -196,6 +199,9 @@ def send_bug_group_eff():
         anchor_time_list += parse_changelog(issue)
     
     df = pd.DataFrame(anchor_time_list)
+    fixed_jira(df)
+
+    ## fixed unknown bug for jira system
     anchro_time_df = pd.merge(df, depts, left_on='who', right_on='name')
 
     for group in iter(group_list):
