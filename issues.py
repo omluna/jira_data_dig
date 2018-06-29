@@ -7,7 +7,7 @@ import json
 import oauth2 as oauth
 import urllib
 import pprint
-from datetime import datetime
+from datetime import datetime,date,timedelta
 from tlslite.utils import keyfactory
 import pymongo
 import pprint
@@ -238,6 +238,18 @@ def update_mongodb(issue_list, host='localhost'):
         if result.raw_result['ok'] != 1.0:
             print("error: key is " + issue['key'])
 
+def generate_statistic():
+    client = pymongo.MongoClient('18.8.8.209')
+    cydb = client.cy
+
+    bug_count = cydb.issues.find({'status': {"$in": ['In Progress', 'Reopened', 'Open', 'Assigned']}}).count()
+    resolved_issues = pd.DataFrame(list(cydb.issues.find({'status': {"$in":['Closed', 'Resolved']}, 'created_time':{'$gt':datetime.now() - timedelta(180)}}, 
+                                                          {'created_time':1, 'resolution.when':1})))
+    avg_time = round((resolved_issues['resolution'].apply(lambda x:x['when']) - resolved_issues['created_time']).mean().total_seconds()/3600/24,1)
+
+    cydb.cy_stat.insert_one({'bug_count':bug_count, 'avg_resolved_time':avg_time, 'gen_time':datetime.now()})
+
+
 
 def main(orig_args):
     mongodb_host = '18.8.8.209'
@@ -249,11 +261,13 @@ def main(orig_args):
         issues_list = get_issues_from_jira(jira_webclient=jira_webclient,updated=None)
         issue_list = convert_issues(issues_list)
         create_mongodb(issue_list, mongodb_host)
+        generate_statistic()
     else:
         issues_list = get_issues_from_jira(jira_webclient=jira_webclient,updated='1h')
         print('sync with jira....' + str(datetime.now()))
         issue_list = convert_issues(issues_list)
         update_mongodb(issue_list, mongodb_host)
+        generate_statistic()
 
 if __name__ == '__main__':
     main(sys.argv[1:])
